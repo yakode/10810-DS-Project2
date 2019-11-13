@@ -176,6 +176,7 @@ int A2B(Point A, Point B, bool out){
 			Point tmp;
 			tmp.x = A.x + dx[i];
 			tmp.y = A.y + dy[i];
+			if(tmp.x >= R || tmp.x < 0 || tmp.y >= C || tmp.y < 0 || floor_map[tmp.x][tmp.y] == '1') continue;
 			if(tmp == B){
 				A = B;
 				floor_map[A.x][A.y] = '2';
@@ -183,7 +184,6 @@ int A2B(Point A, Point B, bool out){
 				if(out) outFile << B.x << ' ' << B.y << "\n";
 				break;
 			}
-			if(tmp.x >= R || tmp.x < 0 || tmp.y >= C || tmp.y < 0) continue;
 			int disTB = step2B(tmp, B);
 
 			if(disAB == disTB+1){
