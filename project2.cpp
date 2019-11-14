@@ -34,6 +34,7 @@ Point find_near(Point start, int battery);
 int step2B(Point A, Point B);
 
 int A2B(Point A, Point B);
+void dfs2(Point cur, Point A, Point B);
 void dfs(Point cur, Point A);
 
 int main(){
@@ -62,20 +63,11 @@ int main(){
 
 	Point pos = RP;
 	int total_step = 0;
-	int this_step;
-	int battery = B;
 	cal_step_map(pos);
 	sum_dirty();
 	while(!all_clean()){
 		Point target = find_farthest();
-		this_step = A2B(pos, target);
-		total_step += this_step;
-		battery -= this_step;
-		pos = target;
-		
-		total_step += A2B(pos, RP);
-		pos = RP;
-		battery = B;
+		total_step += 2*A2B(pos, target);
 	}
 	tmpFile.close();
 
@@ -110,7 +102,8 @@ void sum_dirty(){
 int dx[4] = {0, 0, -1, 1},
 	dy[4] = {-1, 1, 0, 0};
 
-Point queue1[1000000];
+Point queue[1000000];
+Point pre_step[1005][1005];
 void cal_step_map(Point start){
 	for(int i = 0; i < R; ++i)
 		for(int j = 0; j < C; ++j)
@@ -118,20 +111,25 @@ void cal_step_map(Point start){
 	
 	int N = 1000000;
 	int front = -1, rear = -1;
-	queue1[++rear] = start;
+	queue[++rear] = start;
 	step_map[start.x][start.y] = 0;
 	while(front != rear){
 		front = (front + 1) % N;
-		Point ptr = queue1[front];
+		Point ptr = queue[front];
+		
 		for(int i = 0; i < 4; ++i){
 			Point tmp;
 			tmp.x = ptr.x + dx[i];
 			tmp.y = ptr.y + dy[i];
+			
 			if(tmp == RP ||tmp.x >= R || tmp.x < 0 || tmp.y >= C || tmp.y < 0 || 
 					floor_map[tmp.x][tmp.y] == '1' || step_map[tmp.x][tmp.y] != 0) continue;
+			
+			pre_step[tmp.x][tmp.y] = ptr;
+			
 			step_map[tmp.x][tmp.y] = step_map[ptr.x][ptr.y] + 1;
 			rear = (rear + 1) % N;
-			queue1[rear] = tmp;
+			queue[rear] = tmp;
 		}
 	}
 }
@@ -153,43 +151,11 @@ Point find_farthest(){
 	return ans;
 }
 
-Point queue3[1000000];
-Point pre_step[1005][1005];
-int step2B(Point A, Point B){
-	if(A == B) return 0;
-
-	for(int i = 0; i < R; ++i)
-		for(int j = 0; j < C; ++j)
-			mini_step_map[i][j] = 0;
-
-	int N = 1000000;
-	int front = -1, rear = -1;
-	queue3[++rear] = A;
-	mini_step_map[A.x][A.y] = 0;
-	while(front != rear){
-		front = (front + 1) % N;
-		Point ptr = queue3[front];
-		for(int i = 0; i < 4; ++i){
-			Point tmp;
-			tmp.x = ptr.x + dx[i];
-			tmp.y = ptr.y + dy[i];
-			if(tmp == A || tmp.x >= R || tmp.x < 0 || tmp.y >= C || tmp.y < 0 || 
-					floor_map[tmp.x][tmp.y] == '1' || mini_step_map[tmp.x][tmp.y] != 0) continue;
-			pre_step[tmp.x][tmp.y] = ptr;
-			mini_step_map[tmp.x][tmp.y] = mini_step_map[ptr.x][ptr.y] + 1;
-			if(tmp == B) return mini_step_map[tmp.x][tmp.y];
-			rear = (rear + 1) % N;
-			queue3[rear] = tmp;
-		}
-	}
-	return -1;
-}
-
 int A2B(Point A, Point B){
 	int step = 0;
-	int disAB;
-	disAB = step2B(A, B);
+	int disAB = step_map[B.x][B.y];
 	dfs(B, A);
+	dfs2(B, A, B);
 	return disAB;
 }
 
@@ -203,5 +169,14 @@ void dfs(Point cur, Point A){
 			dirty--;
 		}
 		tmpFile << cur.x << ' ' << cur.y << "\n";
+	}
+}
+void dfs2(Point cur, Point A, Point B){
+	if(cur == A){
+		tmpFile << cur.x << ' ' << cur.y << "\n";
+		return;
+	}else{
+		if(cur != B) tmpFile << cur.x << ' ' << cur.y << "\n";
+		dfs2(pre_step[cur.x][cur.y], A, B);
 	}
 }
