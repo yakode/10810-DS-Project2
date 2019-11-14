@@ -72,14 +72,7 @@ int main(){
 		total_step += this_step;
 		battery -= this_step;
 		pos = target;
-		while(1){
-			target = find_near(pos, battery);
-			if(target.x == -1) break;
-			this_step = A2B(pos, target);
-			total_step += this_step;
-			battery -= this_step;
-			pos = target;
-		}
+		
 		total_step += A2B(pos, RP);
 		pos = RP;
 		battery = B;
@@ -103,10 +96,6 @@ int main(){
 	return 0;
 }
 bool all_clean(){
-	/*for(int i = 0; i < R; ++i)
-		for(int j = 0; j < C; ++j)
-			if(floor_map[i][j] == '0') return false;
-	return true;*/
 	return dirty == 0;
 }
 
@@ -164,47 +153,6 @@ Point find_farthest(){
 	return ans;
 }
 
-Point queue2[1000000];
-bool visited[1005][1005];
-Point find_near(Point start, int battery){
-	for(int i = 0; i < R; ++i)
-		for(int j = 0; j < C; ++j)
-			visited[i][j] = false;
-
-	int N = 1000000;
-	int front = -1, rear = -1;
-	queue2[++rear] = start;
-	int no_near = 0;
-	while(front != rear){
-		front = (front + 1) % N;
-		Point ptr = queue2[front];
-		
-		for(int i = 0; i < 4; ++i){
-			Point tmp;
-			tmp.x = ptr.x + dx[i];
-			tmp.y = ptr.y + dy[i];
-			if(tmp == RP || tmp == start ||tmp.x >= R || tmp.x < 0 || tmp.y >= C || tmp.y < 0 || 
-					floor_map[tmp.x][tmp.y] == '1' || visited[tmp.x][tmp.y] == true) continue;
-			if(floor_map[tmp.x][tmp.y] == '0'){
-				if(step2B(start, tmp)+step2B(tmp, RP) <= battery)
-					return tmp;
-				else{
-					no_near++;
-					if(no_near == 20){
-						ptr.x = -1;
-						return ptr;
-					}
-				}	
-			}
-			visited[tmp.x][tmp.y] = true;
-			rear = (rear + 1) % N;
-			queue2[rear] = tmp;
-		}
-	}
-	start.x = -1;
-	return start;
-}
-	
 Point queue3[1000000];
 Point pre_step[1005][1005];
 int step2B(Point A, Point B){
@@ -237,38 +185,10 @@ int step2B(Point A, Point B){
 	return -1;
 }
 
-bool visited2[1005][1005];
 int A2B(Point A, Point B){
-	for(int i = 0; i < R; ++i)
-		for(int j = 0; j < C; ++j)
-			visited2[i][j] = false;
-
 	int step = 0;
-	int disAB = step2B(A, B);
-	/*while(A != B){
-		visited[A.x][A.y] = true;
-		for(int i = 0; i < 4; ++i){
-			Point tmp;
-			tmp.x = A.x + dx[i];
-			tmp.y = A.y + dy[i];
-
-			if(tmp.x >= R || tmp.x < 0 || tmp.y >= C || tmp.y < 0 ||
-					visited2[tmp.x][tmp.y] == true || floor_map[tmp.x][tmp.y] == '1') continue;
-			
-			int disTB = step2B(tmp, B);
-			if(disAB == disTB+1){
-				A = tmp;
-				disAB = disTB;
-				if(A != RP && floor_map[A.x][A.y] == '0'){
-					floor_map[A.x][A.y] = '2';
-					dirty--;
-				}
-				step++;
-				tmpFile << A.x << ' ' << A.y << "\n";
-				break;
-			}
-		}
-	}*/
+	int disAB;
+	disAB = step2B(A, B);
 	dfs(B, A);
 	return disAB;
 }
