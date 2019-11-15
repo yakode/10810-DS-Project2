@@ -25,17 +25,13 @@ bool all_clean();
 void sum_dirty();
 
 int step_map[1000+5][1000+5];
-int mini_step_map[1000+5][1000+5];
 void cal_step_map(Point start);
 
 Point find_farthest();
-Point find_near(Point start, int battery);
-
-int step2B(Point A, Point B);
 
 int A2B(Point A, Point B);
-void dfs2(Point cur, Point A, Point B);
-void dfs(Point cur, Point A);
+void dfs_back(Point cur, Point A, Point B);
+void dfs_to(Point cur, Point A);
 
 int main(){
 	//read map
@@ -154,16 +150,16 @@ Point find_farthest(){
 int A2B(Point A, Point B){
 	int step = 0;
 	int disAB = step_map[B.x][B.y];
-	dfs(B, A);
-	dfs2(B, A, B);
+	dfs_to(B, A);
+	dfs_back(B, A, B);
 	return disAB;
 }
 
-void dfs(Point cur, Point A){
+void dfs_to(Point cur, Point A){
 	if(cur == A){
 		return;
 	}else{
-		dfs(pre_step[cur.x][cur.y], A);
+		dfs_to(pre_step[cur.x][cur.y], A);
 		if(floor_map[cur.x][cur.y] == '0'){
 			floor_map[cur.x][cur.y] = '2';
 			dirty--;
@@ -171,12 +167,12 @@ void dfs(Point cur, Point A){
 		tmpFile << cur.x << ' ' << cur.y << "\n";
 	}
 }
-void dfs2(Point cur, Point A, Point B){
+void dfs_back(Point cur, Point A, Point B){
 	if(cur == A){
 		tmpFile << cur.x << ' ' << cur.y << "\n";
 		return;
 	}else{
 		if(cur != B) tmpFile << cur.x << ' ' << cur.y << "\n";
-		dfs2(pre_step[cur.x][cur.y], A, B);
+		dfs_back(pre_step[cur.x][cur.y], A, B);
 	}
 }
